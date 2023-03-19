@@ -43,13 +43,24 @@
 			Odeslat
 		</button>
 
-		<div v-if="apiResult">
+		<div v-if="result">
 			<hr>
 			<h2>Výsledek</h2>
 
 			<pre>
-				{{ apiResult }}
+				{{ result }}
 			</pre>
+
+			<div style="border: 2px solid red; padding: 10px;">
+				s
+				<div
+					:style="{
+						'background-color': 'red',
+						height: `${result.heightValue}${result.heightUnits}`,
+						width: `${result.widthValue}${result.widthUnits}`,
+					}"
+				/>
+			</div>
 		</div>
 	</form>
 </template>
@@ -67,16 +78,23 @@ export default defineComponent({
 	props: {
 		msg: String
 	},
+	setup() {
+		console.log('setuipík');
+		return {
+
+		}
+	},
 	data() {
 		return {
-			heightValue: 10,
+			heightValue: 100,
 			heightUnits: 'px',
-			widthValue: 10,
-			widthUnits: 'px',
+			widthValue: 100,
+			widthUnits: '%',
 			color: '#FFFFFF',
 			description: '',
 			invalidFeedbacks: {},
-			apiResult: null
+			apiResult: null,
+			result: null
 		};
 	},
 	methods: {
@@ -108,15 +126,15 @@ export default defineComponent({
 			// zobrazit loader
 
 			if (isFormValid) {
-				const payload: Model = {};
-
-				for (const key in this.$data) {
-					payload[key] = this.$data[key];
-				}
-
 				fetch('https://jsonplaceholder.typicode.com/posts', {
 					method: 'POST',
-					body: JSON.stringify(payload),
+					body: JSON.stringify({
+						description: this.description,
+						css: `
+						width: ${this.widthValue}${this.widthUnits};
+						height: ${this.heightValue}${this.heightUnits};
+						background-color: ${this.color};
+					`}),
 					headers: {
 						'Content-type': 'application/json; charset=UTF-8',
 					},
@@ -124,18 +142,21 @@ export default defineComponent({
 					.then((response) => response.json())
 					.then((json: Model) => {
 						this.apiResult = json;
-
-
+						this.result = this.apiResult;
 					})
 					.catch(error => {
 						console.error(error);
 						console.log('Došlo k neočekávané chybě');
 					})
 					.finally(() => {
-						// todo - skrýt loader
-					});
+				// 		// todo - skrýt loader
+				// 	});
+				});
 			}
 		}
-	}
+	},
+	mounted() {
+		this.result = Object.assign({}, this.$data);
+	},
 });
 </script>
