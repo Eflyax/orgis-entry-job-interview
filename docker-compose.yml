@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+  node:
+    container_name: "orgis-fe"
+    image: "node:16.15.1-buster"
+    working_dir: '/var/www/html/'
+    volumes:
+      - ./:/var/www/html/
+    ports:
+      - "3000:3000"
+    stdin_open: true
