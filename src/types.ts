@@ -6,7 +6,11 @@ export interface Model {
 	color: string;
 	description: string;
 	invalidFeedbacks: Record<string, string>;
+	apiResult: ApiPayLoad;
+	result: null;
 }
-export interface ModelResponse extends Model {
-	id: number;
+
+export interface ApiPayLoad {
+	css: string;
+	description: string;
 }

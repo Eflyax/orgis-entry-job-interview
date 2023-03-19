@@ -47,19 +47,10 @@
 			<hr>
 			<h2>Výsledek</h2>
 
-			<pre>
-				{{ result }}
-			</pre>
-
-			<div style="border: 2px solid red; padding: 10px;">
-				s
-				<div
-					:style="{
-						'background-color': 'red',
-						height: `${result.heightValue}${result.heightUnits}`,
-						width: `${result.widthValue}${result.widthUnits}`,
-					}"
-				/>
+			<div
+				:style="result.css"
+			>
+				{{ result.description }}
 			</div>
 		</div>
 	</form>
@@ -67,34 +58,38 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
+import {useLayout} from '../composables/useLayout';
 import InputSize from './InputSize.vue';
-import type {Model} from '../types';
+import type {ApiPayLoad, Model} from '../types';
 
 export default defineComponent({
 	name: 'InputForm',
 	components: {
 		InputSize
 	},
-	props: {
-		msg: String
-	},
 	setup() {
-		console.log('setuipík');
-		return {
+		const {setLoading} = useLayout();
 
+		return {
+			setLoading,
 		}
 	},
-	data() {
+	data(): Model {
 		return {
 			heightValue: 100,
 			heightUnits: 'px',
 			widthValue: 100,
-			widthUnits: '%',
-			color: '#FFFFFF',
+			widthUnits: 'px',
+			color: '#000000',
 			description: '',
 			invalidFeedbacks: {},
 			apiResult: null,
-			result: null
+			// result: null
+			result: {
+				description: 'ahoj',
+  			css: 'width: 100px;height: 100px;background-color: #00ff00;',
+  			id: 101
+			}
 		};
 	},
 	methods: {
@@ -123,18 +118,18 @@ export default defineComponent({
 				isFormValid = Object.values(this.invalidFeedbacks)
 					.every(x => x === null || x === '');
 
-			// zobrazit loader
+			this.setLoading(true);
 
 			if (isFormValid) {
 				fetch('https://jsonplaceholder.typicode.com/posts', {
 					method: 'POST',
 					body: JSON.stringify({
-						description: this.description,
+						description: this.description, // todo - ořezat na 10 znaků
 						css: `
 						width: ${this.widthValue}${this.widthUnits};
 						height: ${this.heightValue}${this.heightUnits};
 						background-color: ${this.color};
-					`}),
+					`.replace((/  |\r\n|\n|\t|\r/gm),'')} as ApiPayLoad),
 					headers: {
 						'Content-type': 'application/json; charset=UTF-8',
 					},
@@ -145,18 +140,15 @@ export default defineComponent({
 						this.result = this.apiResult;
 					})
 					.catch(error => {
-						console.error(error);
+						// toto - zobrazit toaster
 						console.log('Došlo k neočekávané chybě');
 					})
-					.finally(() => {
-				// 		// todo - skrýt loader
-				// 	});
-				});
+					.finally(() => this.setLoading(false));
 			}
 		}
 	},
 	mounted() {
-		this.result = Object.assign({}, this.$data);
+		// this.result = Object.assign({}, this.data.);
 	},
 });
 </script>

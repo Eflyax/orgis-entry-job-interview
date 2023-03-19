@@ -52,8 +52,11 @@ export default defineComponent({
 		this.units = this.$props.sizeUnits;
 	},
 	watch: {
-		value(newValue) {
+		value(newValue: number) {
 			this.$emit('change-value', newValue);
+		},
+		units(newUnits: string) {
+			this.$emit('change-units', newUnits);
 		}
 	}
 });
