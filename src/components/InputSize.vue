@@ -1,5 +1,10 @@
 <template>
-	<label :for="'input' + name">{{ label }}</label>
+	<label
+		:for="'input' + label"
+		class="required"
+	>
+		{{ label }}
+	</label>
 	<div class="input-group mb-3">
 		<input
 			type="text"
@@ -19,9 +24,8 @@
 		</select>
 		<div
 			v-show="error"
-			class="invalid-feedback" style="display: inline;"
+			class="invalid-feedback"
 		>
-		<!-- todo - remove inline style -->
 			Chyba: {{ error }}
 		</div>
 	</div>
@@ -33,7 +37,7 @@ import {defineComponent} from 'vue';
 export default defineComponent({
 	name: 'InputSize',
 	props: {
-		name: String,
+		label: String,
 		error: String,
 		sizeValue: String,
 		sizeUnits: {

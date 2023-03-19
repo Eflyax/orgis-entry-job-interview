@@ -1,7 +1,16 @@
 #app {
-	width: 50%;
-	margin: 0 auto;
 	border: 1px solid gray;
-	padding: 20px;
 	border-radius: 15px;
+	margin: 100px auto;
+	padding: 20px;
+	width: 50%;
+}
+
+.invalid-feedback {
+	display: inline;
+}
+
+.required:after {
+	color: red;
+	content:" *";
 }

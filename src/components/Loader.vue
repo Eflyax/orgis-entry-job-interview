@@ -1,5 +1,5 @@
 <template>
-	<div class="lds-dual-ring">aakak</div>
+	<div class="loader" />
 </template>
 
 <script lang="ts">
@@ -11,28 +11,32 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.lds-dual-ring {
-	background: rgba(#f0f, 0.5);
-	height: 100%;
-	left: 0;
-	position: fixed;
-	top: 0;
-	width: 100%;
+.loader {
+	background-color: rgba(65, 65, 65, 0.8);
+	bottom:0;
+	left:0;
+	position:fixed;
+	right:0;
+	top:0;
 	z-index: 2000;
 }
 
-.lds-dual-ring:after {
-	animation: lds-dual-ring 1.2s linear infinite;
-	border-radius: 50%;
+.loader:after {
+	animation: loader 1.2s linear infinite;
 	border: 6px solid #0ff;
 	border-color: #0ff transparent #0ff transparent;
+	border-radius: 50%;
 	content: " ";
 	display: block;
-	height: 64px;
+	height: 100px;
+	left: calc(50% - 50px);
 	margin: 8px;
-	width: 64px;
+	position: relative;
+	top: calc(50% - 50px);
+	width: 100px;
 }
-@keyframes lds-dual-ring {
+
+@keyframes loader {
 	0% {
 		transform: rotate(0deg);
 	}

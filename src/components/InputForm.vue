@@ -3,10 +3,13 @@
 		class="form"
 		@submit.prevent="onSubmit"
 	>
+		<loader v-if="isLoading" />
+
 		<div class="row">
 			<div class="col-md-3">
 				<InputSize
 					ref="height"
+					label="Výška"
 					:size-value="heightValue"
 					@change-value="heightValue = $event"
 					:size-units="heightUnits"
@@ -16,6 +19,7 @@
 
 				<InputSize
 					ref="width"
+					label="Šířka"
 					:size-value="widthValue"
 					@change-value="widthValue = $event"
 					:size-units="widthUnits"
@@ -34,6 +38,15 @@
 					/>
 				</div>
 			</div>
+
+			<div class="input-group mb-3">
+				<label class="px-2">Barva pozadí</label>
+
+				<color-picker
+					class="form-select"
+					v-model:pureColor="color"
+				/>
+			</div>
 		</div>
 
 		<button
@@ -42,6 +55,14 @@
 		>
 			Odeslat
 		</button>
+
+		<div
+			v-show="fetchError"
+			class="alert alert-danger"
+			role="alert"
+		>
+			{{ fetchError }}
+		</div>
 
 		<div v-if="result">
 			<hr>
@@ -57,22 +78,22 @@
 </template>
 
 <script lang="ts">
+import {ColorPicker} from 'vue3-colorpicker';
 import {defineComponent} from 'vue';
-import {useLayout} from '../composables/useLayout';
 import InputSize from './InputSize.vue';
+import Loader from './Loader.vue';
+import Strings from '../lib/Strings';
 import type {ApiPayLoad, Model} from '../types';
+
+const
+	MAX_WORDS = 10;
 
 export default defineComponent({
 	name: 'InputForm',
 	components: {
-		InputSize
-	},
-	setup() {
-		const {setLoading} = useLayout();
-
-		return {
-			setLoading,
-		}
+		ColorPicker,
+		InputSize,
+		Loader
 	},
 	data(): Model {
 		return {
@@ -80,16 +101,15 @@ export default defineComponent({
 			heightUnits: 'px',
 			widthValue: 100,
 			widthUnits: 'px',
-			color: '#000000',
+			color: 'black',
 			description: '',
 			invalidFeedbacks: {},
 			apiResult: null,
-			// result: null
-			result: {
-				description: 'ahoj',
-  			css: 'width: 100px;height: 100px;background-color: #00ff00;',
-  			id: 101
-			}
+			result: null,
+			isLoading: false,
+			pureColor: '',
+			gradientColor: '',
+			fetchError: ''
 		};
 	},
 	methods: {
@@ -118,13 +138,13 @@ export default defineComponent({
 				isFormValid = Object.values(this.invalidFeedbacks)
 					.every(x => x === null || x === '');
 
-			this.setLoading(true);
-
 			if (isFormValid) {
+				this.isLoading = true;
+
 				fetch('https://jsonplaceholder.typicode.com/posts', {
 					method: 'POST',
 					body: JSON.stringify({
-						description: this.description, // todo - ořezat na 10 znaků
+						description: Strings.shorten(this.description, MAX_WORDS),
 						css: `
 						width: ${this.widthValue}${this.widthUnits};
 						height: ${this.heightValue}${this.heightUnits};
@@ -139,16 +159,10 @@ export default defineComponent({
 						this.apiResult = json;
 						this.result = this.apiResult;
 					})
-					.catch(error => {
-						// toto - zobrazit toaster
-						console.log('Došlo k neočekávané chybě');
-					})
-					.finally(() => this.setLoading(false));
+					.catch(error => this.fetchError = error)
+					.finally(() => this.isLoading = false);
 			}
 		}
-	},
-	mounted() {
-		// this.result = Object.assign({}, this.data.);
 	},
 });
 </script>
