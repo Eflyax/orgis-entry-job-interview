@@ -43,12 +43,12 @@
 			Odeslat
 		</button>
 
-		<div>
+		<div v-if="apiResult">
 			<hr>
 			<h2>Výsledek</h2>
 
 			<pre>
-				{{ $data }}
+				{{ apiResult }}
 			</pre>
 		</div>
 	</form>
@@ -57,6 +57,7 @@
 <script lang="ts">
 import {defineComponent} from 'vue';
 import InputSize from './InputSize.vue';
+import type {Model} from '../types';
 
 export default defineComponent({
 	name: 'InputForm',
@@ -70,11 +71,12 @@ export default defineComponent({
 		return {
 			heightValue: 10,
 			heightUnits: 'px',
-			widthValue: 1,
+			widthValue: 10,
 			widthUnits: 'px',
 			color: '#FFFFFF',
 			description: '',
-			invalidFeedbacks: {}
+			invalidFeedbacks: {},
+			apiResult: null
 		};
 	},
 	methods: {
@@ -100,10 +102,38 @@ export default defineComponent({
 			this.validateFieldNumber('widthValue');
 
 			const
-				isFormValid = Object.values(this.invalidFeedbacks).every(x => x === null || x === '');
+				isFormValid = Object.values(this.invalidFeedbacks)
+					.every(x => x === null || x === '');
+
+			// zobrazit loader
 
 			if (isFormValid) {
-				// todo -send value to API
+				const payload: Model = {};
+
+				for (const key in this.$data) {
+					payload[key] = this.$data[key];
+				}
+
+				fetch('https://jsonplaceholder.typicode.com/posts', {
+					method: 'POST',
+					body: JSON.stringify(payload),
+					headers: {
+						'Content-type': 'application/json; charset=UTF-8',
+					},
+				})
+					.then((response) => response.json())
+					.then((json: Model) => {
+						this.apiResult = json;
+
+
+					})
+					.catch(error => {
+						console.error(error);
+						console.log('Došlo k neočekávané chybě');
+					})
+					.finally(() => {
+						// todo - skrýt loader
+					});
 			}
 		}
 	}
