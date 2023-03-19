@@ -3,49 +3,25 @@
 		class="form"
 		@submit.prevent="onSubmit"
 	>
-	{{invalidFeedbacks}}
 		<div class="row">
 			<div class="col-md-3">
-				<label>Výška</label>
-				<div class="input-group mb-3">
-					<input
-						type="number"
-						class="form-control"
-						v-model="heightValue"
-						ref="heightValue"
-					>
+				<InputSize
+					ref="height"
+					:size-value="heightValue"
+					@change-value="heightValue = $event"
+					:size-units="heightUnits"
+					@change-units="heightUnits = $event"
+					:error="invalidFeedbacks['heightValue']"
+				/>
 
-					<select
-						class="form-select"
-						v-model="heightUnits"
-					>
-						<option>%</option>
-						<option>px</option>
-					</select>
-					<div
-						v-show="invalidFeedbacks['heightValue']"
-						class="invalid-feedback" style="display: inline;"
-					>
-						{{ invalidFeedbacks['heightValue'] }}
-					</div>
-				</div>
-
-				<label>Šířka</label>
-				<div class="input-group mb-3">
-					<input
-						type="number"
-						class="form-control"
-						v-model="widthValue"
-						ref="widthValue"
-					>
-					<select
-						class="form-select"
-						v-model="widthUnits"
-					>
-						<option>%</option>
-						<option>px</option>
-					</select>
-				</div>
+				<InputSize
+					ref="width"
+					:size-value="widthValue"
+					@change-value="widthValue = $event"
+					:size-units="widthUnits"
+					@change-units="widthUnits = $event"
+					:error="invalidFeedbacks['widthValue']"
+				/>
 			</div>
 			<div class="col-md-9">
 				<div class="form-group">
@@ -80,9 +56,13 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
+import InputSize from './InputSize.vue';
 
 export default defineComponent({
 	name: 'InputForm',
+	components: {
+		InputSize
+	},
 	props: {
 		msg: String
 	},
@@ -99,19 +79,32 @@ export default defineComponent({
 	},
 	methods: {
 		validateFieldNumber(fieldName: string, required = true): string | null {
-			const value = this.$data[fieldName];
+			this.invalidFeedbacks[fieldName] = null;
+
+			let value = this.$data[fieldName];
 
 			if (required && !value) {
-				this.invalidFeedbacks[fieldName] = 'chybe nevpylneni';
-				// console.log(fieldName);
-			// }
+				this.invalidFeedbacks[fieldName] = 'Toto pole je povinné.';
+				return this.invalidFeedbacks[fieldName];
 			}
 
-			return null;
+			if (/\D/.test(value)) {
+				this.invalidFeedbacks[fieldName] = 'Vstup musí být číslo.';
+				return this.invalidFeedbacks[fieldName];
+			}
+
+			return this.invalidFeedbacks;
 		},
 		onSubmit(): void {
-			console.log(this.$refs);
 			this.validateFieldNumber('heightValue');
+			this.validateFieldNumber('widthValue');
+
+			const
+				isFormValid = Object.values(this.invalidFeedbacks).every(x => x === null || x === '');
+
+			if (isFormValid) {
+				// todo -send value to API
+			}
 		}
 	}
 });
